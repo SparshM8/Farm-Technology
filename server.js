@@ -711,6 +711,65 @@ app.get('/api/orders', requireAdmin, (req, res) => {
   });
 });
 
+// Admin: import products from products.json (non-destructive)
+app.post('/api/admin/import-products', requireAdmin, (req, res) => {
+  try {
+    if (!fs.existsSync(PRODUCTS_FILE)) return res.status(404).json({ status: 'error', message: 'products.json not found' });
+    const raw = fs.readFileSync(PRODUCTS_FILE, 'utf8');
+    const arr = JSON.parse(raw || '[]');
+    if (!Array.isArray(arr) || arr.length === 0) return res.json({ status: 'ok', added: 0, message: 'No products to import' });
+
+    let processed = 0;
+    let added = 0;
+    const insert = db.prepare('INSERT INTO products (id,title,image,price,description,created_at) VALUES (?,?,?,?,?,?)');
+
+    arr.forEach(p => {
+      const checkId = p.id ? Number(p.id) : null;
+      // Check existence by id (if provided) or title
+      const query = checkId ? 'SELECT id FROM products WHERE id = ? OR title = ?' : 'SELECT id FROM products WHERE title = ?';
+      const params = checkId ? [checkId, p.title] : [p.title];
+      db.get(query, params, (err, row) => {
+        if (!row) {
+          try {
+            insert.run(checkId || null, p.title, p.image || '', p.price || '', p.description || '', Date.now(), function (iErr) {
+              // ignore iErr here; count as added if no error
+              if (!iErr) added++;
+              processed++;
+              if (processed === arr.length) {
+                insert.finalize(() => {
+                  // broadcast updated products list
+                  readProducts((rErr, rows) => {
+                    if (!rErr) io.emit('products:update', rows);
+                    return res.json({ status: 'ok', added });
+                  });
+                });
+              }
+            });
+          } catch (e) {
+            processed++;
+            if (processed === arr.length) {
+              insert.finalize(() => {
+                readProducts((rErr, rows) => { if (!rErr) io.emit('products:update', rows); return res.json({ status: 'ok', added }); });
+              });
+            }
+          }
+        } else {
+          // already exists
+          processed++;
+          if (processed === arr.length) {
+            insert.finalize(() => {
+              readProducts((rErr, rows) => { if (!rErr) io.emit('products:update', rows); return res.json({ status: 'ok', added }); });
+            });
+          }
+        }
+      });
+    });
+  } catch (err) {
+    console.error('Failed to import products:', err.message);
+    return res.status(500).json({ status: 'error', message: 'Import failed' });
+  }
+});
+
 // Admin: update order status
 app.put('/api/orders/:id/status', requireAdmin, (req, res) => {
   const id = Number(req.params.id);
