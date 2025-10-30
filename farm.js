@@ -275,6 +275,61 @@ function addMessage(message, type) {
     }
 }
 
+/* Focus trap helpers used by modals/drawers */
+function trapFocus(container) {
+    if (!container) return;
+    const focusable = container.querySelectorAll('a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])');
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    function handleKey(e) {
+        if (e.key === 'Tab') {
+            if (e.shiftKey) { // shift + tab
+                if (document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                }
+            } else { // tab
+                if (document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+        }
+        if (e.key === 'Escape') {
+            // allow callers to close their modal via Escape; we don't auto-close here
+            container.dispatchEvent(new CustomEvent('escape')); 
+        }
+    }
+    container.__focusHandler = handleKey;
+    document.addEventListener('keydown', handleKey);
+}
+
+function releaseFocus(container) {
+    if (!container || !container.__focusHandler) return;
+    document.removeEventListener('keydown', container.__focusHandler);
+    delete container.__focusHandler;
+}
+
+/* Toast helper for unobtrusive UI feedback */
+function showToast(message, type = 'info', timeout = 4000) {
+    try {
+        const container = document.getElementById('toast-container');
+        if (!container) {
+            console.log(type + ': ' + message);
+            return;
+        }
+        const toast = document.createElement('div');
+        toast.className = `toast ${type === 'success' ? 'success' : (type === 'error' ? 'error' : '')}`.trim();
+        toast.setAttribute('role', 'status');
+        toast.innerHTML = `<div class="toast-body">${message}</div><button class="toast-close" aria-label="Dismiss">×</button>`;
+        const closeBtn = toast.querySelector('.toast-close');
+        closeBtn.addEventListener('click', () => { container.removeChild(toast); });
+        container.appendChild(toast);
+        // auto dismiss
+        setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, timeout);
+    } catch (err) { console.warn('showToast error', err); }
+}
+
 // NOTE: legacy `X-Admin-Password` header fallback removed for security.
 // Admin requests should use session-based auth (login endpoint) only.
 
@@ -667,6 +722,9 @@ function initializeSocket() {
         adminPanel.classList.remove('hidden');
         adminPanel.setAttribute('aria-hidden', 'false');
         trapFocus(adminPanel);
+        // focus first actionable nav control for keyboard users
+        const firstNav = adminPanel.querySelector('.admin-nav-btn');
+        if (firstNav) firstNav.focus();
     };
 
     const hideAdminPanel = () => {
@@ -792,11 +850,23 @@ function initializeSocket() {
     });
 
     adminLogoutBtn.addEventListener('click', () => {
-        fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' }).then(() => {
-            // Do not persist admin secrets client-side. Rely on session cookie invalidation.
-            hideAdminPanel();
-            adminLogoutBtn.classList.add('hidden');
-        });
+        if (!confirm('Logout from admin panel?')) return;
+        adminLogoutBtn.classList.add('is-loading');
+        adminLogoutBtn.setAttribute('aria-busy', 'true');
+        fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' })
+            .then(() => {
+                hideAdminPanel();
+                adminLogoutBtn.classList.add('hidden');
+                showToast('Logged out', 'success');
+            })
+            .catch((err) => {
+                console.error('Logout failed', err);
+                showToast('Logout failed. Try again.', 'error');
+            })
+            .finally(() => {
+                adminLogoutBtn.classList.remove('is-loading');
+                adminLogoutBtn.removeAttribute('aria-busy');
+            });
     });
 
     // Admin panel navigation
@@ -1032,24 +1102,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (importBtn) {
         importBtn.addEventListener('click', async () => {
             if (!confirm('Import products from products.json into the database? This will only add missing products.')) return;
-            importBtn.disabled = true;
-            importBtn.textContent = 'Importing...';
+            importBtn.classList.add('is-loading');
+            importBtn.setAttribute('aria-busy', 'true');
             try {
                 const resp = await fetchAdmin('/api/admin/import-products', { method: 'POST' });
                 if (!resp) throw new Error('No response');
                 const json = await resp.json();
                 if (resp.ok) {
-                    alert(`Import complete. Added ${json.added || 0} products.`);
+                    showToast(`Import complete. Added ${json.added || 0} products.`, 'success');
                     loadProductsForAdmin();
                 } else {
-                    alert('Import failed: ' + (json && json.message ? json.message : resp.statusText));
+                    showToast('Import failed: ' + (json && json.message ? json.message : resp.statusText), 'error');
                 }
             } catch (err) {
                 console.error('Import products failed', err);
-                alert('Import failed. Are you logged in as admin and is the backend reachable?');
+                showToast('Import failed. Are you logged in as admin and is the backend reachable?', 'error');
             } finally {
-                importBtn.disabled = false;
-                importBtn.textContent = 'Import Products';
+                importBtn.classList.remove('is-loading');
+                importBtn.removeAttribute('aria-busy');
             }
         });
     }
