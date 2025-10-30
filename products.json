@@ -1,23 +1,93 @@
 [
   {
     "id": 1,
-    "title": "Organic Fertilizer",
+    "title": "Organic Fertilizer (Liquid)",
     "image": "fertilizers.jpg",
     "price": "₹400/L",
-    "description": "100% organic fertilizer for healthy gardens and high yields."
+    "description": "100% organic liquid fertilizer for healthier plants and improved yields. Suitable for vegetables and ornamentals."
   },
   {
     "id": 2,
-    "title": "Insecticide",
+    "title": "Insecticide (Broad-spectrum)",
     "image": "Insecticides.jpg",
     "price": "₹400/L",
-    "description": "Effective insecticide for a pest-free garden."
+    "description": "Broad-spectrum insecticide for common crop pests. Follow label instructions and safety guidelines."
   },
   {
     "id": 3,
     "title": "Plant Growth Promoter",
     "image": "promoter.webp",
     "price": "₹300/L",
-    "description": "Enhance plant growth and root development."
+    "description": "Natural growth promoter to boost root and shoot development. Use as a foliar spray."
+  },
+  {
+    "id": 4,
+    "title": "Tomato Hybrid Seeds (100g)",
+    "image": "vegetable.jpg",
+    "price": "₹250/pack",
+    "description": "High-yield hybrid tomato seeds suited for long-season cultivation. Pack size: 100g."
+  },
+  {
+    "id": 5,
+    "title": "Potato Seed Tubers (1kg)",
+    "image": "03.jpg",
+    "price": "₹60/kg",
+    "description": "Certified seed tubers for early and main-season potato crops. Sold per kg."
+  },
+  {
+    "id": 6,
+    "title": "Bio-Compost (50kg)",
+    "image": "fertilizers.jpg",
+    "price": "₹1,200/bag",
+    "description": "Well-decomposed organic compost to improve soil structure and fertility. Bag weight: 50kg."
+  },
+  {
+    "id": 7,
+    "title": "Neem Oil (1L)",
+    "image": "herb.webp",
+    "price": "₹350/L",
+    "description": "Cold-pressed neem oil for organic pest management and foliar application. Effective against many sap-sucking pests."
+  },
+  {
+    "id": 8,
+    "title": "Mulch Film (5m roll)",
+    "image": "04.jpg",
+    "price": "₹900/roll",
+    "description": "UV-stabilized mulch film for moisture conservation and weed suppression. Roll length: 5 meters."
+  },
+  {
+    "id": 9,
+    "title": "Drip Irrigation Starter Kit",
+    "image": "02.jpg",
+    "price": "₹4,999/kit",
+    "description": "Basic drip irrigation starter kit for small plots (includes mainline tubing, emitters, and connectors)."
+  },
+  {
+    "id": 10,
+    "title": "Soil Test Kit (Field)",
+    "image": "flower.jpg",
+    "price": "₹450/kit",
+    "description": "Portable soil test kit for pH, N, P, K estimates. Useful for quick on-field assessments."
+  },
+  {
+    "id": 11,
+    "title": "Agricultural Gloves (Pair)",
+    "image": "promoter.webp",
+    "price": "₹199/pair",
+    "description": "Durable, chemical-resistant gloves suitable for spraying and handling fertilizers."
+  },
+  {
+    "id": 12,
+    "title": "Mixed Vegetable Seed Pack",
+    "image": "vegetable.jpg",
+    "price": "₹299/pack",
+    "description": "Assorted seeds pack for kitchen gardens: tomato, chilli, bhindi, and coriander. Approximate quantity per pack."
+  },
+  {
+    "id": 13,
+    "title": "Hand Sprayer (5L)",
+    "image": "03.jpg",
+    "price": "₹799/pc",
+    "description": "Manual 5-litre knapsack/shoulder sprayer for small farms and gardens. Lightweight and easy to use."
   }
 ]
