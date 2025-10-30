@@ -275,20 +275,13 @@ function addMessage(message, type) {
     }
 }
 
-// Global helper to retrieve admin password stored in localStorage.
-// Kept for legacy support when using header-based fallback in development only.
-function getAdminPassword() {
-    try {
-        return localStorage.getItem('adminPassword');
-    } catch (e) {
-        return null;
-    }
-}
+// NOTE: legacy `X-Admin-Password` header fallback removed for security.
+// Admin requests should use session-based auth (login endpoint) only.
 
 // Helper that performs admin API requests robustly:
 // 1) try same-origin with credentials
 // 2) try backend origin (window.__BACKEND_ORIGIN or http://localhost:3000) with credentials
-// 3) finally, if an admin password exists in localStorage, use X-Admin-Password header (legacy/dev only)
+// NOTE: legacy header-based fallback removed. Server must accept session cookies.
 async function fetchAdmin(path, options = {}) {
     const opts = Object.assign({}, options);
     // Try same-origin relative path first
@@ -308,20 +301,6 @@ async function fetchAdmin(path, options = {}) {
     } catch (e) {
         // ignore
     }
-
-    // Legacy header fallback (development only)
-    const pw = getAdminPassword();
-    if (pw) {
-        const headers = Object.assign({}, opts.headers || {});
-        headers['X-Admin-Password'] = pw;
-        try {
-            const r3 = await fetch(url, Object.assign({}, opts, { headers }));
-            return r3;
-        } catch (e) {
-            // ignore
-        }
-    }
-
     // If nothing worked, return a 401-like Response so callers can check .ok
     return new Response(null, { status: 401, statusText: 'Unauthorized' });
 }
@@ -707,16 +686,7 @@ function initializeSocket() {
             // ignore
         }
 
-        // final fallback: if an admin password is stored in localStorage, consider admin logged-in for header-based calls
-        try {
-            const pw = localStorage.getItem('adminPassword');
-            if (pw) {
-                // we won't call server here, but show logout so user can use header-authenticated admin actions
-                adminLogoutBtn.classList.remove('hidden');
-                return;
-            }
-        } catch (e) {}
-
+        // No legacy header fallback: show logout only when session is active
         adminLogoutBtn.classList.add('hidden');
     }
 
@@ -748,7 +718,7 @@ function initializeSocket() {
 
         // Helper to mark success in UI
         const onLoginSuccess = () => {
-            try { localStorage.setItem('adminPassword', password); } catch (e) {}
+            // Do NOT store admin password in localStorage. Use session cookies only.
             hideLoginModal();
             showAdminPanel();
             adminLogoutBtn.classList.remove('hidden');
@@ -800,30 +770,14 @@ function initializeSocket() {
             console.warn('Session login to backend failed:', err && err.message);
         }
 
-        try {
-            // Header-based fallback: test a protected endpoint using X-Admin-Password
-            const test = await fetch(`${backend}/api/orders`, {
-                method: 'GET',
-                headers: { 'X-Admin-Password': password }
-            });
-            if (test.ok) {
-                // store password locally as fallback and treat as logged in
-                onLoginSuccess();
-                return;
-            }
-            // If we reach here, password was rejected by backend
-            adminLoginError.textContent = 'Incorrect password or backend not reachable. Ensure the server is running (http://localhost:3000) and try again.';
-            adminLoginError.style.display = 'block';
-        } catch (err) {
-            console.error('Admin cross-origin check failed:', err);
-            adminLoginError.textContent = 'Unable to contact backend at ' + backend + '. Make sure the server is running.';
-            adminLoginError.style.display = 'block';
-        }
+        // No legacy header fallback is allowed. If session login to backend failed, show an error.
+        adminLoginError.textContent = 'Incorrect password or backend not reachable. Ensure the server is running (http://localhost:3000) and that CORS allows credentials. Use the admin login form on the server host.';
+        adminLoginError.style.display = 'block';
     });
 
     adminLogoutBtn.addEventListener('click', () => {
         fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' }).then(() => {
-            try { localStorage.removeItem('adminPassword'); } catch(e) {}
+            // Do not persist admin secrets client-side. Rely on session cookie invalidation.
             hideAdminPanel();
             adminLogoutBtn.classList.add('hidden');
         });
@@ -870,7 +824,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!loadProductsBtn || !productsContainer || !editFormContainer || !addProductBtn) return;
 
-    // Use the global getAdminPassword() helper (defined earlier) for legacy header-based fallback if present.
+    // Admin actions use session-based authentication via `fetchAdmin` which attempts session requests.
 
     const renderAddForm = () => {
         editFormContainer.innerHTML = `

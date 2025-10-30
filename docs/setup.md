@@ -64,7 +64,7 @@ node tests/test-socket.js
 
 6) Admin access (development)
 
-Visit `/admin` or use the admin panel in `farm.html`. The project supports a development fallback header `X-Admin-Password` for scripts when the frontend is served from a static origin.
+Visit `/admin` or use the admin panel in `farm.html`. Admin endpoints use session-based authentication via the `/api/admin/login` endpoint. There is no longer a header-based `X-Admin-Password` fallback (do not store admin credentials client-side).
 
 7) Production notes
 
