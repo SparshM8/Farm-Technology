@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "title": "Organic Fertilizer",
+    "image": "fertilizers.jpg",
+    "price": "₹400/L",
+    "description": "100% organic fertilizer for healthy gardens and high yields."
+  },
+  {
+    "id": 2,
+    "title": "Insecticide",
+    "image": "Insecticides.jpg",
+    "price": "₹400/L",
+    "description": "Effective insecticide for a pest-free garden."
+  },
+  {
+    "id": 3,
+    "title": "Plant Growth Promoter",
+    "image": "promoter.webp",
+    "price": "₹300/L",
+    "description": "Enhance plant growth and root development."
+  }
+]

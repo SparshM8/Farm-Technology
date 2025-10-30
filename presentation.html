@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>FarmStore Presentation</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Arial;background:#111;color:#fff;margin:0}
+    .slide{min-height:100vh;padding:48px;box-sizing:border-box}
+    .center{display:flex;flex-direction:column;justify-content:center;align-items:center}
+    h1{font-size:48px;margin:0 0 24px}
+    h2{font-size:28px;margin:0 0 12px}
+    p{max-width:900px}
+    .controls{position:fixed;right:16px;bottom:16px}
+    button{background:#0a84ff;border:none;color:#fff;padding:10px 16px;border-radius:6px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <main id="deck">
+    <section class="slide center" data-title="title">
+      <h1>FarmStore</h1>
+      <p>Lightweight e‑commerce for farm inputs — demo & final year submission</p>
+      <p><strong>Author:</strong> [Your Name] &nbsp; • &nbsp; <strong>Date:</strong> 2025-10-30</p>
+    </section>
+
+    <section class="slide" data-title="features">
+      <h2>Key Features</h2>
+      <ul>
+        <li>Responsive product catalog with WebP/JPEG srcset</li>
+        <li>Client cart with localStorage persistence</li>
+        <li>Server-side checkout (Express + SQLite) with secure totals</li>
+        <li>Admin order management with realtime updates (Socket.IO)</li>
+        <li>Accessibility improvements (focus trap, ARIA, keyboard)</li>
+      </ul>
+    </section>
+
+    <section class="slide" data-title="architecture">
+      <h2>Architecture</h2>
+      <p>Static frontend + Node.js backend. Image pipeline via Sharp generates multiple sizes and a manifest. Server emits events via Socket.IO for realtime updates.</p>
+    </section>
+
+    <section class="slide" data-title="demo">
+      <h2>Demo Script</h2>
+      <ol>
+        <li>Start the server: <code>npm start</code></li>
+        <li>Open `farm.html`, browse products and add items to cart</li>
+        <li>Checkout to create an order; watch admin panel receive `orders:new`</li>
+        <li>Change order status in admin and observe realtime update</li>
+      </ol>
+    </section>
+
+    <section class="slide center" data-title="thanks">
+      <h2>Thank you</h2>
+      <p>Questions?</p>
+    </section>
+  </main>
+
+  <div class="controls">
+    <button id="prev">◀ Prev</button>
+    <button id="next">Next ▶</button>
+  </div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    let idx = 0;
+    function show(i){slides.forEach((s,j)=>s.style.display = j===i? 'block' : 'none');}
+    show(idx);
+    document.getElementById('next').onclick = ()=>{ idx = Math.min(idx+1, slides.length-1); show(idx)};
+    document.getElementById('prev').onclick = ()=>{ idx = Math.max(idx-1,0); show(idx)};
+    document.addEventListener('keydown', e=>{ if(e.key==='ArrowRight') document.getElementById('next').click(); if(e.key==='ArrowLeft') document.getElementById('prev').click(); });
+  </script>
+</body>
+</html>

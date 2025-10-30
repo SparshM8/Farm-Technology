@@ -1,0 +1,10 @@
+node_modules
+npm-debug.log
+data/*.db
+uploads/
+.git
+.github
+tests/data.test.db
+dist
+coverage
+*.tgz

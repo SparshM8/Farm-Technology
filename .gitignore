@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+.env
+env.local
+.DS_Store
+/.idea
+.vscode
+data/*.db
+tests/data.test.db
+uploads/
+*.zip
+*.tgz
+npm-debug.log
+yarn-debug.log
+yarn-error.log

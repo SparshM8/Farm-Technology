@@ -1,0 +1,12 @@
+node_modules
+uploads
+farm.js
+farm.html
+farm.css
+presentation.html
+README.md
+docs
+tests/data.test.db
+data/*.db
+dist
+.git
