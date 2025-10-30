@@ -1026,6 +1026,33 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     loadProductsBtn.addEventListener('click', loadProductsForAdmin);
+
+    // Import products from products.json (admin-only)
+    const importBtn = document.getElementById('import-products-btn');
+    if (importBtn) {
+        importBtn.addEventListener('click', async () => {
+            if (!confirm('Import products from products.json into the database? This will only add missing products.')) return;
+            importBtn.disabled = true;
+            importBtn.textContent = 'Importing...';
+            try {
+                const resp = await fetchAdmin('/api/admin/import-products', { method: 'POST' });
+                if (!resp) throw new Error('No response');
+                const json = await resp.json();
+                if (resp.ok) {
+                    alert(`Import complete. Added ${json.added || 0} products.`);
+                    loadProductsForAdmin();
+                } else {
+                    alert('Import failed: ' + (json && json.message ? json.message : resp.statusText));
+                }
+            } catch (err) {
+                console.error('Import products failed', err);
+                alert('Import failed. Are you logged in as admin and is the backend reachable?');
+            } finally {
+                importBtn.disabled = false;
+                importBtn.textContent = 'Import Products';
+            }
+        });
+    }
 });
 
 // --- Admin Panel: Messages ---
