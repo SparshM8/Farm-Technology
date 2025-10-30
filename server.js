@@ -719,51 +719,93 @@ app.post('/api/admin/import-products', requireAdmin, (req, res) => {
     const arr = JSON.parse(raw || '[]');
     if (!Array.isArray(arr) || arr.length === 0) return res.json({ status: 'ok', added: 0, message: 'No products to import' });
 
+    // Idempotent import: insert new products, update existing when fields differ
     let processed = 0;
     let added = 0;
-    const insert = db.prepare('INSERT INTO products (id,title,image,price,description,created_at) VALUES (?,?,?,?,?,?)');
+    let updated = 0;
+
+    const insertStmt = db.prepare('INSERT INTO products (id,title,image,price,description,price_value,created_at) VALUES (?,?,?,?,?,?,?)');
+    const updateStmt = db.prepare('UPDATE products SET title=?, image=?, price=?, description=?, price_value=? WHERE id=?');
+
+    const parsePriceValue = (price) => {
+      if (price == null) return null;
+      const s = String(price).trim();
+      if (s.length === 0) return null;
+      // if starts with $, treat as USD -> INR conversion (fallback)
+      if (s.startsWith('$')) {
+        const usd = parseFloat(s.replace(/[^0-9.\-]+/g, ''));
+        if (isNaN(usd)) return null;
+        const conversion = process.env.USD_TO_INR ? Number(process.env.USD_TO_INR) : 83;
+        return Math.round(usd * conversion);
+      }
+      const num = parseFloat(s.replace(/[^0-9.\.-]+/g, ''));
+      if (isNaN(num)) return null;
+      return Math.round(num);
+    };
 
     arr.forEach(p => {
-      const checkId = p.id ? Number(p.id) : null;
-      // Check existence by id (if provided) or title
-      const query = checkId ? 'SELECT id FROM products WHERE id = ? OR title = ?' : 'SELECT id FROM products WHERE title = ?';
-      const params = checkId ? [checkId, p.title] : [p.title];
-      db.get(query, params, (err, row) => {
+      const desired = {
+        id: p.id ? Number(p.id) : null,
+        title: p.title || '',
+        image: p.image || '',
+        price: p.price || '',
+        description: p.description || ''
+      };
+
+      // Find existing by id (if provided) or by title
+      const findQuery = desired.id ? 'SELECT * FROM products WHERE id = ? OR title = ?' : 'SELECT * FROM products WHERE title = ?';
+      const findParams = desired.id ? [desired.id, desired.title] : [desired.title];
+
+      db.get(findQuery, findParams, (err, row) => {
+        if (err) {
+          console.error('Import lookup error:', err.message);
+        }
+
         if (!row) {
+          // Insert new product (preserve provided id when safe)
           try {
-            insert.run(checkId || null, p.title, p.image || '', p.price || '', p.description || '', Date.now(), function (iErr) {
-              // ignore iErr here; count as added if no error
+            const createdAt = Date.now();
+            const priceVal = parsePriceValue(desired.price);
+            insertStmt.run(desired.id || null, desired.title, desired.image, desired.price, desired.description, priceVal, createdAt, function (iErr) {
               if (!iErr) added++;
               processed++;
-              if (processed === arr.length) {
-                insert.finalize(() => {
-                  // broadcast updated products list
-                  readProducts((rErr, rows) => {
-                    if (!rErr) io.emit('products:update', rows);
-                    return res.json({ status: 'ok', added });
-                  });
-                });
-              }
+              if (processed === arr.length) finishImport();
             });
           } catch (e) {
+            console.error('Insert failed for product', desired.title, e.message);
             processed++;
-            if (processed === arr.length) {
-              insert.finalize(() => {
-                readProducts((rErr, rows) => { if (!rErr) io.emit('products:update', rows); return res.json({ status: 'ok', added }); });
-              });
-            }
+            if (processed === arr.length) finishImport();
           }
         } else {
-          // already exists
-          processed++;
-          if (processed === arr.length) {
-            insert.finalize(() => {
-              readProducts((rErr, rows) => { if (!rErr) io.emit('products:update', rows); return res.json({ status: 'ok', added }); });
+          // Compare and update if changed
+          const needUpdate = (row.title !== desired.title) || (row.image !== desired.image) || (row.price !== desired.price) || (row.description !== desired.description);
+          if (needUpdate) {
+            const priceVal = parsePriceValue(desired.price);
+            updateStmt.run(desired.title, desired.image, desired.price, desired.description, priceVal, row.id, function (uErr) {
+              if (!uErr) updated++;
+              processed++;
+              if (processed === arr.length) finishImport();
             });
+          } else {
+            // nothing to do
+            processed++;
+            if (processed === arr.length) finishImport();
           }
         }
       });
     });
+
+    const finishImport = () => {
+      insertStmt.finalize(() => {
+        updateStmt.finalize(() => {
+          // broadcast updated products list
+          readProducts((rErr, rows) => {
+            if (!rErr) io.emit('products:update', rows);
+            return res.json({ status: 'ok', added, updated });
+          });
+        });
+      });
+    };
   } catch (err) {
     console.error('Failed to import products:', err.message);
     return res.status(500).json({ status: 'error', message: 'Import failed' });
