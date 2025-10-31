@@ -27,7 +27,12 @@
     <link rel="icon" href="logo.png" type="image/png">
     <link rel="apple-touch-icon" href="logo.png">
     <link rel="canonical" href="https://your-website-url.com/">
-    <meta name="theme-color" content="#2ecc71">
+    <!-- Theme color for supported browsers. Note: some browsers (Firefox, Opera desktop) do not use this tag;
+        the Web App Manifest (`manifest.json`) provides `theme_color` as a broader fallback. -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#2ecc71">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#123812">
+    <!-- Tile color for Windows/Edge legacy tiles -->
+    <meta name="msapplication-TileColor" content="#2ecc71">
 
     <!-- Performance hints -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -80,7 +85,7 @@
                     </span>
                     <span class="header-title">Farming Technology</span>
                 </a>
-            <nav id="main-nav" class="navbar" role="navigation" aria-label="Main navigation">
+            <nav id="main-nav" class="navbar nav-links" role="navigation" aria-label="Main navigation">
                     <a href="#home" class="nav-link">HOME</a>
                     <a href="#products" class="nav-link">PRODUCTS</a>
                     <a href="#news" class="nav-link">NEWS</a>
@@ -93,8 +98,8 @@
                         <span id="cart-count">0</span>
                     </button>
                 </div>
-                <button class="mobile-menu-button" aria-label="Open Menu" aria-expanded="false" aria-controls="main-nav">
-                    <i class="fas fa-bars"></i>
+                <button class="mobile-menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="main-nav">
+                    <i class="fas fa-bars" aria-hidden="true"></i>
                 </button>
             </div>
         </div>
@@ -316,16 +321,19 @@
                 <div class="contact-wrapper">
                     <form id="contactForm" class="contact-form" action="https://formsubmit.co/sparshm8@ieee.org" method="POST" aria-label="Contact form">
                         <div class="form-group">
-                            <label for="name">Name</label>
-                            <input type="text" id="name" name="name" placeholder="Your Name" required>
+                            <label for="name">Name <span class="required" aria-label="required">*</span></label>
+                            <input type="text" id="name" name="name" placeholder="Your Name" required aria-describedby="name-error" aria-invalid="false">
+                            <div id="name-error" class="error-message" role="alert" aria-live="polite"></div>
                         </div>
                         <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" name="email" placeholder="Your Email" required>
+                            <label for="email">Email <span class="required" aria-label="required">*</span></label>
+                            <input type="email" id="email" name="email" placeholder="Your Email" required aria-describedby="email-error" aria-invalid="false">
+                            <div id="email-error" class="error-message" role="alert" aria-live="polite"></div>
                         </div>
                         <div class="form-group">
-                            <label for="message">Message</label>
-                            <textarea id="message" name="message" placeholder="Your Message" required></textarea>
+                            <label for="message">Message <span class="required" aria-label="required">*</span></label>
+                            <textarea id="message" name="message" placeholder="Your Message" required aria-describedby="message-error" aria-invalid="false"></textarea>
+                            <div id="message-error" class="error-message" role="alert" aria-live="polite"></div>
                         </div>
                         <input type="hidden" name="_captcha" value="false">
                         <input type="hidden" name="_next" value="https://yourwebsite.com/thank-you.html">
@@ -343,40 +351,429 @@
             <button id="admin-close" class="admin-close" aria-label="Close admin panel">×</button>
         </div>
         <div class="admin-content">
-            <div class="admin-left">
-                <h3>Navigation</h3>
-                <ul class="admin-nav">
-                    <li><button id="admin-overview-btn" class="admin-nav-btn active" aria-label="Overview">Overview</button></li>
-                    <li><button id="admin-products-btn" class="admin-nav-btn" aria-label="Manage Products">Manage Products</button></li>
-                    <li><button id="admin-orders-btn" class="admin-nav-btn" aria-label="View Orders">View Orders</button></li>
-                    <li><button id="admin-messages-btn" class="admin-nav-btn" aria-label="View Contact Messages">View Messages</button></li>
-                </ul>
-                <button id="admin-logout-btn" class="btn btn-secondary">Logout</button>
-            </div>
-            <div class="admin-main">
-                <div id="admin-overview" class="admin-section active">
-                    <h3>Overview</h3>
-                    <p>Welcome to the admin panel. Select an option from the navigation to get started.</p>
+            <!-- Enhanced Navigation Sidebar -->
+            <div class="admin-sidebar">
+                <div class="sidebar-header">
+                    <h3><i class="fas fa-cogs"></i> Admin Panel</h3>
+                    <p class="sidebar-subtitle">Management Dashboard</p>
                 </div>
-                <div id="admin-products" class="admin-section hidden">
-                    <h3>Manage Products</h3>
-                    <div class="admin-toolbar">
-                        <button id="add-product-btn" class="btn btn-primary">Add New Product</button>
-                        <button id="load-products-btn" class="btn btn-secondary">Refresh Products</button>
-                        <button id="import-products-btn" class="btn btn-secondary">Import Products</button>
+
+                <nav class="admin-navigation">
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <button id="admin-overview-btn" class="nav-link active" aria-label="Dashboard Overview">
+                                <div class="nav-icon">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                </div>
+                                <div class="nav-content">
+                                    <span class="nav-title">Dashboard</span>
+                                    <span class="nav-subtitle">Overview & Analytics</span>
+                                </div>
+                                <div class="nav-indicator"></div>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button id="admin-products-btn" class="nav-link" aria-label="Manage Products">
+                                <div class="nav-icon">
+                                    <i class="fas fa-boxes"></i>
+                                </div>
+                                <div class="nav-content">
+                                    <span class="nav-title">Products</span>
+                                    <span class="nav-subtitle">Inventory Management</span>
+                                </div>
+                                <div class="nav-indicator"></div>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button id="admin-orders-btn" class="nav-link" aria-label="View Orders">
+                                <div class="nav-icon">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </div>
+                                <div class="nav-content">
+                                    <span class="nav-title">Orders</span>
+                                    <span class="nav-subtitle">Customer Orders</span>
+                                </div>
+                                <div class="nav-indicator"></div>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button id="admin-messages-btn" class="nav-link" aria-label="View Contact Messages">
+                                <div class="nav-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="nav-content">
+                                    <span class="nav-title">Messages</span>
+                                    <span class="nav-subtitle">Contact Forms</span>
+                                </div>
+                                <div class="nav-indicator"></div>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <button id="admin-logout-btn" class="btn-logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
+                    <div class="sidebar-status">
+                        <div class="status-indicator online"></div>
+                        <span>Online</span>
                     </div>
-                    <div id="products-admin-container" class="admin-grid"></div>
-                    <div id="product-edit-form-container"></div>
                 </div>
-                <div id="admin-orders" class="admin-section hidden">
-                    <h3>Customer Orders</h3>
-                    <button id="load-orders-btn" class="btn btn-primary">Load Orders</button>
-                    <div id="orders-container" class="admin-grid"></div>
+            </div>
+            <!-- Enhanced Main Content Area -->
+            <div class="admin-main-content">
+                <!-- Overview Section -->
+                <div id="admin-overview" class="content-section active">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h2><i class="fas fa-chart-line"></i> Dashboard Overview</h2>
+                            <p>Welcome back! Here's what's happening with your farm technology business.</p>
+                        </div>
+                        <div class="section-actions">
+                            <button class="btn-refresh" id="refresh-dashboard-btn">
+                                <i class="fas fa-sync-alt"></i>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-content">
+                    <div class="admin-stats-grid">
+                        <div class="admin-stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h4 id="total-products">0</h4>
+                                <p>Total Products</p>
+                                <span class="stat-trend positive"><i class="fas fa-arrow-up"></i> +12%</span>
+                            </div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h4 id="total-orders">0</h4>
+                                <p>Active Orders</p>
+                                <span class="stat-trend positive"><i class="fas fa-arrow-up"></i> +8%</span>
+                            </div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h4 id="total-messages">0</h4>
+                                <p>New Messages</p>
+                                <span class="stat-trend neutral"><i class="fas fa-minus"></i> 0%</span>
+                            </div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h4 id="total-revenue">₹0</h4>
+                                <p>Monthly Revenue</p>
+                                <span class="stat-trend positive"><i class="fas fa-arrow-up"></i> +15%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-dashboard-grid">
+                        <div class="admin-chart-section">
+                            <h4><i class="fas fa-chart-bar"></i> Revenue Overview</h4>
+                            <div class="admin-chart-placeholder">
+                                <div class="chart-bars">
+                                    <div class="chart-bar" style="height: 60%"></div>
+                                    <div class="chart-bar" style="height: 80%"></div>
+                                    <div class="chart-bar" style="height: 40%"></div>
+                                    <div class="chart-bar" style="height: 90%"></div>
+                                    <div class="chart-bar" style="height: 70%"></div>
+                                    <div class="chart-bar" style="height: 85%"></div>
+                                    <div class="chart-bar active" style="height: 95%"></div>
+                                </div>
+                                <div class="chart-labels">
+                                    <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="admin-activity-section">
+                            <h4><i class="fas fa-history"></i> Recent Activity</h4>
+                            <div class="activity-feed">
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-plus-circle"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <p>New product "Organic Fertilizer Pro" added</p>
+                                        <span class="activity-time">2 hours ago</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <p>Order #1234 completed</p>
+                                        <span class="activity-time">4 hours ago</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <p>New customer inquiry received</p>
+                                        <span class="activity-time">6 hours ago</span>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-user-plus"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <p>5 new customers registered</p>
+                                        <span class="activity-time">1 day ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-status-section">
+                        <h4><i class="fas fa-server"></i> System Status</h4>
+                        <div class="system-status-grid">
+                            <div class="status-item">
+                                <div class="status-indicator online"></div>
+                                <div class="status-content">
+                                    <h5>Server Status</h5>
+                                    <p>All systems operational</p>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-indicator online"></div>
+                                <div class="status-content">
+                                    <h5>Database</h5>
+                                    <p>Connected & healthy</p>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-indicator warning"></div>
+                                <div class="status-content">
+                                    <h5>Storage</h5>
+                                    <p>75% capacity used</p>
+                                </div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-indicator online"></div>
+                                <div class="status-content">
+                                    <h5>API Services</h5>
+                                    <p>99.9% uptime</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-welcome-message">
+                        <h4>Welcome back, Administrator! 🌾</h4>
+                        <p>Manage your farming technology products, track orders, and respond to customer inquiries from this central dashboard. Use the navigation menu to access different sections.</p>
+                        <div class="admin-quick-actions">
+                            <button class="btn btn-primary" onclick="document.getElementById('admin-products-btn').click()">
+                                <i class="fas fa-plus"></i> Add Product
+                            </button>
+                            <button class="btn btn-secondary" onclick="document.getElementById('admin-orders-btn').click()">
+                                <i class="fas fa-list"></i> View Orders
+                            </button>
+                            <button class="btn btn-accent" onclick="document.getElementById('admin-messages-btn').click()">
+                                <i class="fas fa-envelope"></i> Check Messages
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div id="admin-messages" class="admin-section hidden">
-                    <h3>Contact Messages</h3>
-                    <button id="load-messages-btn" class="btn btn-primary">Load Messages</button>
-                    <div id="messages-container" class="admin-grid"></div>
+                <!-- Products Management Section -->
+                <div id="admin-products" class="content-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h2><i class="fas fa-boxes"></i> Product Management</h2>
+                            <p>Manage your farm technology products and inventory.</p>
+                        </div>
+                        <div class="section-actions">
+                            <div class="action-buttons">
+                                <button id="load-products-btn" class="btn-secondary">
+                                    <i class="fas fa-sync-alt"></i>
+                                    Refresh
+                                </button>
+                                <button id="add-product-btn" class="btn-primary">
+                                    <i class="fas fa-plus"></i>
+                                    Add Product
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="products-toolbar">
+                        <div class="toolbar-filters">
+                            <div class="filter-group">
+                                <label for="product-category-filter">Category:</label>
+                                <select id="product-category-filter" class="filter-select">
+                                    <option value="">All Categories</option>
+                                    <option value="seeds">Seeds</option>
+                                    <option value="equipment">Equipment</option>
+                                    <option value="fertilizers">Fertilizers</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="product-status-filter">Status:</label>
+                                <select id="product-status-filter" class="filter-select">
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="out-of-stock">Out of Stock</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="toolbar-search">
+                            <div class="search-input-wrapper">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="product-search" placeholder="Search products..." class="search-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="products-admin-container" class="data-grid products-grid">
+                        <div class="grid-loading">
+                            <div class="loading-spinner"></div>
+                            <p>Loading products...</p>
+                        </div>
+                    </div>
+
+                    <div id="product-edit-form-container" class="form-container hidden"></div>
+                </div>
+                <!-- Orders Management Section -->
+                <div id="admin-orders" class="content-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h2><i class="fas fa-shopping-cart"></i> Customer Orders</h2>
+                            <p>View and manage customer orders and transactions.</p>
+                        </div>
+                        <div class="section-actions">
+                            <div class="action-buttons">
+                                <button id="load-orders-btn" class="btn-primary">
+                                    <i class="fas fa-download"></i>
+                                    Load Orders
+                                </button>
+                                <button class="btn-secondary">
+                                    <i class="fas fa-file-export"></i>
+                                    Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="orders-toolbar">
+                        <div class="toolbar-filters">
+                            <div class="filter-group">
+                                <label for="order-status-filter">Status:</label>
+                                <select id="order-status-filter" class="filter-select">
+                                    <option value="">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="processing">Processing</option>
+                                    <option value="shipped">Shipped</option>
+                                    <option value="delivered">Delivered</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="order-date-filter">Date Range:</label>
+                                <select id="order-date-filter" class="filter-select">
+                                    <option value="today">Today</option>
+                                    <option value="week">This Week</option>
+                                    <option value="month">This Month</option>
+                                    <option value="all">All Time</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="toolbar-stats">
+                            <div class="stat-badge">
+                                <span class="stat-number" id="orders-count">0</span>
+                                <span class="stat-label">Total Orders</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="orders-container" class="data-grid orders-grid">
+                        <div class="grid-empty">
+                            <div class="empty-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <h3>No Orders Yet</h3>
+                            <p>Customer orders will appear here once they start placing orders.</p>
+                            <button class="btn-primary" id="load-orders-btn">
+                                <i class="fas fa-download"></i>
+                                Load Orders
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Messages Section -->
+                <div id="admin-messages" class="content-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h2><i class="fas fa-envelope"></i> Contact Messages</h2>
+                            <p>View and respond to customer inquiries and support requests.</p>
+                        </div>
+                        <div class="section-actions">
+                            <div class="action-buttons">
+                                <button id="load-messages-btn" class="btn-primary">
+                                    <i class="fas fa-download"></i>
+                                    Load Messages
+                                </button>
+                                <button class="btn-secondary">
+                                    <i class="fas fa-archive"></i>
+                                    Archive All
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="messages-toolbar">
+                        <div class="toolbar-filters">
+                            <div class="filter-group">
+                                <label for="message-status-filter">Status:</label>
+                                <select id="message-status-filter" class="filter-select">
+                                    <option value="">All Messages</option>
+                                    <option value="unread">Unread</option>
+                                    <option value="read">Read</option>
+                                    <option value="replied">Replied</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="toolbar-stats">
+                            <div class="stat-badge unread">
+                                <span class="stat-number" id="unread-count">0</span>
+                                <span class="stat-label">Unread</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="messages-container" class="data-grid messages-grid">
+                        <div class="grid-empty">
+                            <div class="empty-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <h3>No Messages Yet</h3>
+                            <p>Contact form submissions will appear here.</p>
+                            <button class="btn-primary" id="load-messages-btn">
+                                <i class="fas fa-download"></i>
+                                Load Messages
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -386,18 +783,64 @@
     <div id="admin-login-modal" class="admin-login-modal hidden" role="dialog" aria-modal="true" aria-labelledby="admin-login-heading">
         <div class="admin-login-content">
             <div class="admin-login-header">
-                <h2 id="admin-login-heading">Admin Access</h2>
+                <div class="admin-login-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="admin-login-title">
+                    <h2 id="admin-login-heading">Secure Admin Access</h2>
+                    <p>Enter your credentials to access the administration panel</p>
+                </div>
                 <button id="admin-login-close" class="admin-login-close" aria-label="Close login">×</button>
             </div>
-            <form id="admin-login-form" class="admin-login-form">
-                <p>Please enter the password to access the admin panel.</p>
-                <div class="form-group">
-                    <label for="admin-password">Password</label>
-                    <input type="password" id="admin-password" name="admin-password" required>
+
+            <div class="admin-login-body">
+                <div class="admin-security-notice">
+                    <div class="security-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="security-text">
+                        <h4>Secure Connection</h4>
+                        <p>Your session is protected with SSL encryption</p>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Login</button>
-                <p id="admin-login-error" class="error-message"></p>
-            </form>
+
+                <form id="admin-login-form" class="admin-login-form" aria-labelledby="admin-login-heading">
+                    <div class="form-group floating-label">
+                        <input type="password" id="admin-password" name="admin-password" required aria-describedby="admin-login-error" aria-invalid="false" autocomplete="current-password">
+                        <label for="admin-password">
+                            <i class="fas fa-key"></i>
+                            Administrator Password
+                        </label>
+                        <div class="input-icon">
+                            <i class="fas fa-eye" id="toggle-password" title="Toggle password visibility"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary login-btn">
+                            <span class="btn-text">Access Admin Panel</span>
+                            <div class="btn-loader" style="display: none;">
+                                <div class="spinner"></div>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="login-footer">
+                        <div class="remember-device">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="remember-device">
+                                <span class="checkmark"></span>
+                                Remember this device
+                            </label>
+                        </div>
+                        <div class="forgot-password">
+                            <a href="#" id="forgot-password-link">Forgot Password?</a>
+                        </div>
+                    </div>
+                </form>
+
+                <div id="admin-login-error" class="error-message" role="alert" aria-live="polite" style="display: none;"></div>
+            </div>
         </div>
     </div>
 

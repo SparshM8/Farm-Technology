@@ -7,7 +7,24 @@ on:
     branches: [ main, master ]
 
 jobs:
-  test:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+  unit-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,12 +41,36 @@ jobs:
       - name: Run unit tests
         run: npm run test:unit
 
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
       - name: Start server
         run: |
-          # start the server in background so the next step can use it
-          node server.js &
-          # wait for server to be available (max ~15s)
-          n=0; until curl -sS http://localhost:3000/ > /dev/null || [ $n -ge 15 ]; do n=$((n+1)); sleep 1; done
+          # start the server in background, capture pid and logs (robust for CI)
+          nohup node server.js > server.log 2>&1 &
+          echo $! > server.pid
+          # wait for server to be available (max ~30s)
+          n=0
+          until curl -sS http://localhost:3000/ > /dev/null || [ $n -ge 30 ]; do n=$((n+1)); sleep 1; done
+          if [ $n -ge 30 ]; then
+            echo "Server did not start in time. Dumping server.log:";
+            tail -n 200 server.log || true
+            exit 1
+          fi
 
-      - name: Run socket smoke test
-        run: node tests/test-socket.js
+      - name: Run E2E tests
+        run: npm run test:e2e
