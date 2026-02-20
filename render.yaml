@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: farming-tech-shop-api
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && node server.js
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://your-vercel-domain.vercel.app
+      - key: CORS_ORIGIN
+        value: https://your-vercel-domain.vercel.app
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_SECURE
+        value: false
+      - key: SMTP_USER
+        scope: build
+      - key: SMTP_PASS
+        scope: build
