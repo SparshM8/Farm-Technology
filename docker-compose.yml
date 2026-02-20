@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      JWT_SECRET: your-secret-key-change-in-production
+      # Add more environment variables as needed
+    volumes:
+      - ./backend/farming_tech.db:/app/backend/farming_tech.db
+    restart: unless-stopped
+
+  # Optional: for development with hot reload
+  # dev:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.dev
+  #   ports:
+  #     - "3000:3000"
+  #     - "5173:5173"
+  #   volumes:
+  #     - ./backend:/app/backend
+  #     - ./frontend:/app/frontend
+  #     - /app/backend/node_modules
+  #     - /app/frontend/node_modules
+  #   environment:
+  #     NODE_ENV: development

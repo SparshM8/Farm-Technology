@@ -1,0 +1,28 @@
+{
+  "name": "farming-tech-shop",
+  "version": "1.0.0",
+  "description": "Production-ready agricultural e-commerce platform",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install && cd ..",
+    "db:init": "cd backend && node scripts/init-db.js && node scripts/seed-db.js && cd ..",
+    "backend": "cd backend && npm start",
+    "backend:dev": "cd backend && npm run dev",
+    "frontend": "cd frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build",
+    "build": "npm run frontend:build && echo 'Production build complete!'",
+    "start": "cd backend && npm start",
+    "dev": "npm run frontend & npm run backend",
+    "docker:build": "docker build -t farming-tech-shop:latest .",
+    "docker:run": "docker-compose up",
+    "test": "cd backend && npm test"
+  },
+  "keywords": [
+    "agriculture",
+    "ecommerce",
+    "farming",
+    "production"
+  ],
+  "author": "",
+  "license": "MIT"
+}
