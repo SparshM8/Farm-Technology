@@ -2,20 +2,20 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files
-COPY backend/package*.json ./backend/
-COPY frontend/package*.json ./frontend/
+# Copy entire project
+COPY . .
 
-# Install dependencies
-RUN cd backend && npm ci --only=production
-RUN cd frontend && npm ci
+# Install backend dependencies (production)
+RUN cd backend && npm install --omit=dev
+
+# Install frontend dependencies
+RUN cd frontend && npm install
 
 # Build frontend
-COPY frontend ./frontend
 RUN cd frontend && npm run build
 
-# Copy backend
-COPY backend ./backend
+# Remove frontend node_modules (not needed in production)
+RUN rm -rf frontend/node_modules
 
 EXPOSE 3000
 
