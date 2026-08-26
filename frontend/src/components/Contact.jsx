@@ -58,7 +58,7 @@ export default function Contact() {
     <section id="contact" className="contact-section">
       <div className="container">
         <h2>Contact Us</h2>
-        <p className="subtitle">Have questions? We'd love to hear from you.</p>
+        <p className="subtitle">Have questions? We&apos;d love to hear from you.</p>
 
         <form className="contact-form" onSubmit={handleSubmit}>
           <div className="form-group">
@@ -127,7 +127,7 @@ export default function Contact() {
 
           {success && (
             <div className="success-message">
-              ✓ Thank you! We'll get back to you soon.
+              ✓ Thank you! We&apos;ll get back to you soon.
             </div>
           )}
 

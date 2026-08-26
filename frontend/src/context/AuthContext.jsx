@@ -17,49 +17,41 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function register(email, name, password, phone) {
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name, password, phone }),
-      });
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, name, password, phone }),
+    });
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Registration failed');
-      }
-
+    if (!response.ok) {
       const data = await response.json();
-      setToken(data.token);
-      setUser(data.user);
-      localStorage.setItem('authToken', data.token);
-      return data;
-    } catch (error) {
-      throw error;
+      throw new Error(data.error || 'Registration failed');
     }
+
+    const data = await response.json();
+    setToken(data.token);
+    setUser(data.user);
+    localStorage.setItem('authToken', data.token);
+    return data;
   }
 
   async function login(email, password) {
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Login failed');
-      }
-
+    if (!response.ok) {
       const data = await response.json();
-      setToken(data.token);
-      setUser(data.user);
-      localStorage.setItem('authToken', data.token);
-      return data;
-    } catch (error) {
-      throw error;
+      throw new Error(data.error || 'Login failed');
     }
+
+    const data = await response.json();
+    setToken(data.token);
+    setUser(data.user);
+    localStorage.setItem('authToken', data.token);
+    return data;
   }
 
   function logout() {
