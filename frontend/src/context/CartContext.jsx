@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from './AuthContext';
+import { api } from '../lib/api';
+import { addGuestCartItem, setGuestItemQuantity } from '../lib/guestCart';
 
 const CartContext = createContext(null);
 const GUEST_CART_KEY = 'farmingTechGuestCart';
@@ -18,22 +20,13 @@ export function CartProvider({ children }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const syncedTokenRef = useRef(null);
 
-  const request = async (path, options = {}) => {
-    const response = await fetch(path, {
-      ...options,
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, ...(options.headers || {}) },
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.error || 'Cart request failed');
-    return data;
-  };
-
-  const loadServerCart = async () => {
+  const loadServerCart = useCallback(async () => {
     if (!token) return;
     setLoading(true);
     try {
-      const data = await request('/api/cart');
+      const data = await api.cart.get(token);
       setItems(data.cart.items || []);
       setError('');
     } catch (requestError) {
@@ -41,29 +34,40 @@ export function CartProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     if (authLoading) return;
     if (!token) {
+      syncedTokenRef.current = null;
       setItems(readGuestCart());
+      setLoading(false);
       return;
     }
+
+    let active = true;
     const syncGuestCart = async () => {
+      if (syncedTokenRef.current === token) {
+        await loadServerCart();
+        return;
+      }
+      syncedTokenRef.current = token;
       const guestItems = readGuestCart();
       try {
-        await Promise.all(guestItems.map((item) => request('/api/cart/items', {
-          method: 'POST',
-          body: JSON.stringify({ productId: item.productId, quantity: item.quantity }),
-        })));
-        localStorage.removeItem(GUEST_CART_KEY);
+        if (guestItems.length) {
+          await Promise.all(guestItems.map((item) => api.cart.add(token, item.productId, item.quantity)));
+          localStorage.removeItem(GUEST_CART_KEY);
+        }
       } catch (syncError) {
-        setError(syncError.message);
+        if (active) setError(syncError.message);
       }
-      loadServerCart();
+      if (active) await loadServerCart();
     };
     syncGuestCart();
-  }, [authLoading, token]);
+    return () => {
+      active = false;
+    };
+  }, [authLoading, token, loadServerCart]);
 
   const updateGuest = (next) => {
     setItems(next);
@@ -73,30 +77,26 @@ export function CartProvider({ children }) {
   const addToCart = async (product) => {
     setError('');
     if (token) {
-      await request('/api/cart/items', { method: 'POST', body: JSON.stringify({ productId: product.id, quantity: 1 }) });
+      await api.cart.add(token, product.id, 1);
       await loadServerCart();
       return;
     }
-    const existing = items.find((item) => item.productId === product.id);
-    const next = existing
-      ? items.map((item) => item.productId === product.id ? { ...item, quantity: Math.min(item.quantity + 1, product.stock) } : item)
-      : [...items, { id: product.id, productId: product.id, name: product.name, price: product.price, quantity: 1, stock: product.stock }];
-    updateGuest(next);
+    updateGuest(addGuestCartItem(items, product));
   };
 
   const updateQuantity = async (item, quantity) => {
     if (quantity < 1) return removeItem(item);
     if (token) {
-      await request(`/api/cart/items/${item.id}`, { method: 'PUT', body: JSON.stringify({ quantity }) });
+      await api.cart.update(token, item.id, quantity);
       await loadServerCart();
       return;
     }
-    updateGuest(items.map((current) => current.productId === item.productId ? { ...current, quantity: Math.min(quantity, current.stock || quantity) } : current));
+    updateGuest(setGuestItemQuantity(items, item.productId, quantity));
   };
 
   const removeItem = async (item) => {
     if (token) {
-      await request(`/api/cart/items/${item.id}`, { method: 'DELETE' });
+      await api.cart.remove(token, item.id);
       await loadServerCart();
       return;
     }

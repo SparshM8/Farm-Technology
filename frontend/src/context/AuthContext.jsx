@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { api } from '../lib/api';
 
 const AuthContext = createContext(null);
 const TOKEN_KEY = 'authToken';
@@ -32,25 +33,11 @@ export function AuthProvider({ children }) {
   };
 
   async function register(email, name, password, phone) {
-    const response = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, name, password, phone }),
-    });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Registration failed');
-    return persistSession(data);
+    return persistSession(await api.auth.register(email, name, password, phone));
   }
 
   async function login(email, password) {
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Login failed');
-    return persistSession(data);
+    return persistSession(await api.auth.login(email, password));
   }
 
   function logout() {
@@ -60,7 +47,9 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(USER_KEY);
   }
 
-  return <AuthContext.Provider value={{ user, token, loading, register, login, logout }}>{children}</AuthContext.Provider>;
+  const value = useMemo(() => ({ user, token, loading, register, login, logout }), [user, token, loading]);
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

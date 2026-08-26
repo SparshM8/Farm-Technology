@@ -2,32 +2,5 @@ import React from 'react';
 import './Footer.css';
 
 export default function Footer() {
-  return (
-    <footer className="footer">
-      <div className="container">
-        <div className="footer-content">
-          <div className="footer-section">
-            <h3>🌾 Farming Tech Shop</h3>
-            <p>Quality agricultural products for modern farming.</p>
-          </div>
-          <div className="footer-section">
-            <h4>Quick Links</h4>
-            <ul>
-              <li><a href="#home">Home</a></li>
-              <li><a href="#products">Products</a></li>
-              <li><a href="#contact">Contact</a></li>
-            </ul>
-          </div>
-          <div className="footer-section">
-            <h4>Contact Info</h4>
-            <p>Email: info@farmingtech.com</p>
-            <p>Phone: +91-XXXX-XXXX-XX</p>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <p>&copy; 2024 Farming Tech Shop. All rights reserved.</p>
-        </div>
-      </div>
-    </footer>
-  );
+  return <footer className="site-footer"><div className="container"><div className="footer-top"><a className="footer-brand" href="#home"><span>FT</span><strong>Farm Technology</strong></a><p>A considered supply desk for the work that starts before sunrise.</p><a className="footer-cta" href="#products">Explore supplies <span>→</span></a></div><div className="footer-bottom"><small>© {new Date().getFullYear()} Farm Technology. Built for field work.</small><div><a href="#products">Store</a><a href="#contact">Support</a><a href="#home">Top ↑</a></div></div></div></footer>;
 }

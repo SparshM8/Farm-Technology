@@ -1,82 +1,27 @@
-/* Header.css */
-.header {
-  background-color: white;
-  box-shadow: var(--shadow);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.header-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 0;
-}
-
-.logo h1 {
-  color: var(--primary-color);
-  font-size: 1.8rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.nav {
-  display: flex;
-  gap: 2rem;
-  align-items: center;
-}
-
-.nav a {
-  color: var(--text-color);
-  font-weight: 500;
-  transition: color 0.3s ease;
-}
-
-.nav a:hover {
-  color: var(--primary-color);
-}
-
-.header-actions { display:flex; align-items:center; gap:.65rem; }
-.account-btn { background:transparent; color:var(--text-color); border:1px solid var(--border-color); padding:.55rem .7rem; border-radius:7px; font-size:.78rem; }
-.cart-trigger { background:var(--primary-color); color:white; padding:.58rem .78rem; border-radius:7px; font-weight:700; }
-.cart-trigger span { display:inline-grid; place-items:center; min-width:1.25rem; height:1.25rem; margin-left:.3rem; border-radius:999px; background:white; color:var(--primary-color); font-size:.72rem; }
-
-.mobile-menu-btn {
-  display: none;
-  background: none;
-  font-size: 1.5rem;
-  color: var(--text-color);
-  padding: 0.5rem;
-}
-
-@media (max-width: 768px) {
-  .mobile-menu-btn {
-    display: block;
-  }
-
-  .nav {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: white;
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
-    box-shadow: var(--shadow);
-  }
-
-  .nav.open {
-    display: flex;
-  }
-
-  .logo h1 {
-    font-size: 1.4rem;
-  }
-
-  .header-actions { margin-left:auto; }
-  .account-btn { display:none; }
-  .cart-trigger { padding:.5rem .65rem; }
-}
+.site-header { position: sticky; top: 0; z-index: 30; border-bottom: 1px solid rgba(247, 243, 234, 0.14); background: rgba(12, 41, 29, 0.94); backdrop-filter: blur(16px); color: #f8f4e9; }
+.header-shell { position: relative; display: flex; align-items: center; min-height: 76px; gap: 2rem; }
+.brand { display: inline-flex; flex: none; align-items: center; gap: 0.7rem; }
+.brand-mark { display: grid; width: 37px; height: 37px; grid-template-columns: 1fr 1fr; overflow: hidden; border: 1px solid rgba(199, 236, 113, 0.7); border-radius: 50% 50% 48% 52%; color: var(--lime); font-family: 'DM Mono', monospace; font-size: 0.68rem; transform: rotate(-8deg); }
+.brand-mark i { display: grid; place-items: center; font-style: normal; }
+.brand-mark i:last-child { background: var(--lime); color: var(--green-950); }
+.brand strong, .brand small { display: block; }
+.brand strong { font-size: 0.86rem; font-weight: 800; letter-spacing: -0.03em; }
+.brand small { margin-top: -0.08rem; color: rgba(248, 244, 233, 0.62); font-family: 'DM Mono', monospace; font-size: 0.59rem; letter-spacing: 0.14em; text-transform: uppercase; }
+.main-nav { display: flex; align-items: center; gap: 1.6rem; margin-left: auto; }
+.main-nav a { position: relative; color: rgba(248, 244, 233, 0.72); font-size: 0.78rem; font-weight: 700; }
+.main-nav a::after { position: absolute; right: 0; bottom: -0.35rem; left: 0; height: 1px; background: var(--lime); content: ''; opacity: 0; transform: scaleX(0); transition: transform 180ms var(--ease-out), opacity 180ms var(--ease-out); }
+.main-nav a:hover, .main-nav a:focus-visible { color: #fffdf7; }
+.main-nav a:hover::after, .main-nav a:focus-visible::after { opacity: 1; transform: scaleX(1); }
+.header-actions { display: flex; align-items: center; gap: 0.6rem; }
+.account-button, .cart-button { display: inline-flex; align-items: center; justify-content: center; gap: 0.42rem; min-height: 39px; padding: 0 0.76rem; border: 1px solid rgba(248, 244, 233, 0.16); border-radius: 999px; background: transparent; color: #f8f4e9; font-size: 0.72rem; font-weight: 800; transition: transform 160ms var(--ease-out), background 160ms var(--ease-out), border-color 160ms var(--ease-out); }
+.account-button:hover, .cart-button:hover { border-color: var(--lime); background: rgba(199, 236, 113, 0.12); transform: translateY(-1px); }
+.account-button:active, .cart-button:active { transform: scale(0.97); }
+.account-icon { color: var(--lime); font-size: 1.2rem; line-height: 0; }
+.account-avatar { display: grid; width: 22px; height: 22px; place-items: center; border-radius: 50%; background: var(--lime); color: var(--green-950); font-family: 'DM Mono', monospace; font-size: 0.68rem; }
+.account-button small { color: rgba(248, 244, 233, 0.5); font-size: 0.59rem; font-weight: 600; }
+.cart-button { border-color: var(--lime); background: var(--lime); color: var(--green-950); }
+.cart-button span { font-size: 1.1rem; line-height: 0; transform: rotate(45deg); }
+.cart-button em { display: grid; min-width: 17px; height: 17px; place-items: center; border-radius: 50%; background: var(--green-950); color: var(--lime); font-family: 'DM Mono', monospace; font-size: 0.61rem; font-style: normal; }
+.nav-toggle { display: none; }
+@media (max-width: 880px) { .header-shell { gap: 1rem; } .main-nav { gap: 1rem; } .main-nav a { font-size: 0.72rem; } }
+@media (max-width: 730px) { .header-shell { min-height: 65px; justify-content: space-between; } .nav-toggle { display: grid; width: 38px; height: 38px; place-content: center; gap: 5px; border: 1px solid rgba(248, 244, 233, 0.18); border-radius: 50%; background: transparent; } .nav-toggle span { display: block; width: 14px; height: 1px; background: var(--lime); } .main-nav { position: absolute; top: calc(100% + 9px); right: 14px; left: 14px; display: grid; gap: 0.25rem; padding: 0.7rem; border: 1px solid rgba(248, 244, 233, 0.15); border-radius: 16px; background: var(--green-950); box-shadow: var(--shadow-lg); opacity: 0; pointer-events: none; transform: translateY(-8px); transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out); } .main-nav.is-open { opacity: 1; pointer-events: auto; transform: translateY(0); } .main-nav a { padding: 0.7rem; } .account-button span:not(.account-avatar), .account-button small, .cart-button b { display: none; } .account-button, .cart-button { min-width: 38px; padding: 0; } }
