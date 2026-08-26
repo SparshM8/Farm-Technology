@@ -1,341 +1,117 @@
-# 🌾 Farming Tech Shop - Production E-Commerce Platform
+# Farm-Technology
 
-A **full-featured, production-ready** agricultural e-commerce platform built with React, Node.js, Express, and SQLite. Includes complete user authentication, shopping cart, order management, admin panel, and more.
+> A field-to-cart agricultural commerce storefront built with React, Express, and SQLite.
 
-## ✨ Features
+Farm-Technology helps growers explore seeds, soil care, crop protection, tools, and field essentials through a responsive product catalog. The current release focuses on a dependable shopper journey: live catalog search and filtering, a persistent guest basket, optional account sign-in, and guest-to-account cart synchronization.
 
-### Customer Features
-✅ **User Management**
-- User registration & login with JWT authentication
-- Secure password hashing (bcryptjs)
-- User profile management
+## What is available now
 
-✅ **Shopping**
-- Browse products with search & filter
-- Shopping cart with persistent storage
-- Add product reviews and ratings
+| Surface | Included in this release |
+| --- | --- |
+| Catalog | Live products, category chips, text search, stock indicators, and responsive product cards. |
+| Cart | Browser-persistent guest basket, quantities, removal, estimated totals, and authenticated server-cart synchronization. |
+| Accounts | JWT-backed registration, sign-in, sign-out, and session restoration. |
+| Support | A validated product/contact enquiry form backed by the existing API. |
+| Platform | React/Vite client, Express API, SQLite storage, automated tests, and a production Docker build. |
 
-✅ **Checkout & Orders**
-- Secure checkout process
-- Order history & tracking
-- Order confirmation emails
-- Real-time order status updates
+Checkout and order creation are deliberately **not exposed in the current shopper UI**. They are the next commerce milestone, rather than an implied completed feature.
 
-✅ **Responsive Design**
-- Mobile-first responsive layout
-- Works on all device sizes
-- Touch-friendly interface
+## Architecture
 
-### Admin Features
-✅ **Admin Dashboard**
-- View sales statistics
-- Manage products (CRUD)
-- Manage orders & order status
-- View customer inquiries
-
-✅ **Order Management**
-- Process orders
-- Update shipping status
-- Track inventory
-
-## 🏗️ Architecture
-
-```
-FarmingTechShop/
-├── frontend/                 # React SPA (Vite)
-│   ├── src/
-│   │   ├── components/       # React components
-│   │   ├── context/          # React Context (Auth)
-│   │   ├── App.jsx
-│   │   └── index.css
-│   ├── dist/                 # Production build
-│   └── vite.config.js
-│
-├── backend/                  # Node.js/Express API
-│   ├── db/
-│   │   └── database.js       # SQLite setup
-│   ├── routes/               # API endpoints
-│   ├── middleware/           # Auth, validation, errors
-│   ├── utils/                # Helpers (JWT, email, etc)
-│   ├── scripts/              # DB init & seed
-│   ├── server.js             # Main app
-│   └── farming_tech.db       # SQLite database
-│
-├── Dockerfile                # Docker configuration
-├── docker-compose.yml        # Docker Compose setup
-└── README.md
+```text
+Browser
+  └─ React + Vite storefront
+       ├─ components/      focused visual surfaces
+       ├─ context/         auth session + cart lifecycle
+       ├─ hooks/           catalog data loading and derivation
+       └─ lib/api.js       single API request boundary
+                │
+                ▼
+          Express API
+       ├─ auth, products, cart, orders, contact routes
+       ├─ security middleware and request validation
+       └─ SQLite catalog and application data
 ```
 
-## 🚀 Quick Start
+The deeper ownership and request-flow notes are in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-### Prerequisites
-- **Node.js** 16+ & npm 7+
-- **Git**
+## Local development
 
-### Installation
+### Requirements
 
-1. **Clone & Install**
-   ```bash
-   git clone <repo-url>
-   cd FarmingTechShop
-   
-   # Install backend
-   cd backend && npm install && cd ..
-   
-   # Install frontend
-   cd frontend && npm install && cd ..
-   ```
-
-2. **Initialize Database**
-   ```bash
-   cd backend
-   node scripts/init-db.js   # Create tables
-   node scripts/seed-db.js   # Add sample data
-   cd ..
-   ```
-
-3. **Start Development**
-   ```bash
-   # Terminal 1: Backend
-   cd backend && npm run dev
-   
-   # Terminal 2: Frontend
-   cd frontend && npm run dev
-   ```
-
-4. **Access Application**
-   - Frontend: http://localhost:5173
-   - API: http://localhost:3000
-   - Admin: admin@farmingtechshop.com / admin123
-
-## 📚 API Documentation
-
-### Authentication
-```bash
-POST /api/auth/register    # Register new user
-POST /api/auth/login       # Login user
-```
-
-### Products
-```bash
-GET  /api/products                    # Get all products
-GET  /api/products/:id                # Get product details
-GET  /api/products/categories/all     # Get all categories
-POST /api/products/:id/reviews        # Add review (auth required)
-```
-
-### Shopping Cart
-```bash
-GET    /api/cart                   # Get cart
-POST   /api/cart/items             # Add to cart
-PUT    /api/cart/items/:itemId     # Update cart item
-DELETE /api/cart/items/:itemId     # Remove from cart
-DELETE /api/cart                   # Clear cart
-```
-
-### Orders
-```bash
-POST /api/orders              # Create order
-GET  /api/orders              # Get user orders
-GET  /api/orders/:orderId     # Get order details
-```
-
-### Admin (requires auth + admin role)
-```bash
-GET  /api/admin/dashboard/stats         # Dashboard stats
-POST /api/admin/products                # Create product
-PUT  /api/admin/products/:id            # Update product
-DELETE /api/admin/products/:id          # Delete product
-GET  /api/admin/orders                  # Get all orders
-PUT  /api/admin/orders/:id/status       # Update order status
-GET  /api/admin/contacts                # Get contact submissions
-PUT  /api/admin/contacts/:id/status     # Update contact status
-```
-
-### Contact
-```bash
-POST /api/contact            # Submit contact form
-```
-
-## ⚙️ Configuration
-
-### Environment Variables
-Create `backend/.env`:
-
-```env
-PORT=3000
-NODE_ENV=production
-FRONTEND_URL=http://localhost:5173
-
-JWT_SECRET=your-secure-secret-key
-
-# Email (optional)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
-SMTP_FROM=noreply@farmingtechshop.com
-```
-
-## 🐳 Docker Deployment
-
-### Build & Run with Docker
-```bash
-# Build image
-docker build -t farming-tech-shop .
-
-# Run container
-docker run -p 3000:3000 -e JWT_SECRET=your-secret farming-tech-shop
-
-# Using Docker Compose
-docker-compose up -d
-```
-
-## 📦 Production Build
+Use Node.js 18 or newer and npm. Install frontend and backend dependencies separately because this repository is a two-package application.
 
 ```bash
-# Build frontend
+git clone https://github.com/SparshM8/Farm-Technology.git
+cd Farm-Technology
+
+cd backend && npm install && cd ..
+cd frontend && npm install && cd ..
+```
+
+### Start the API
+
+The database schema is created automatically at server startup. Seed the local demonstration catalog once before first use.
+
+```bash
+cd backend
+npm run seed
+PORT=3000 npm start
+```
+
+### Start the storefront
+
+In a second terminal, point the Vite client at the local API.
+
+```bash
 cd frontend
-npm run build
-cd ..
-
-# Start backend (serves frontend build)
-cd backend
-npm start
+VITE_API_BASE_URL=http://localhost:3000 npm run dev
 ```
 
-Then visit: http://localhost:3000
+Open the Vite URL shown in the terminal. The frontend’s API base is intentionally configured through `VITE_API_BASE_URL`; when it is empty, requests stay relative to the current origin.
 
-## 🧪 Testing
+## Validation
+
+Run all checks from the respective package directories:
 
 ```bash
-# Run API tests
-cd backend
+# Client data rules, linting, and production bundle
+cd frontend
 npm test
+npm run lint
+npm run build
 
-# Run with hot reload
-npm run dev
+# API routes and utility behavior
+cd ../backend
+npm test
 ```
 
-## 🔐 Security Features
+## Production deployment
 
-- ✅ JWT token-based authentication
-- ✅ Bcrypt password hashing
-- ✅ CORS protection
-- ✅ Rate limiting (100 req/15min)
-- ✅ Helmet.js security headers
-- ✅ Input validation & sanitization
-- ✅ SQL injection prevention (parameterized queries)
-- ✅ HTTPS-ready configuration
+The production topology separates the static storefront from the long-running API:
 
-## 📊 Database Schema
+| Service | Responsibility | Configuration |
+| --- | --- | --- |
+| Render | Builds the repository Dockerfile, seeds the demonstration catalog, serves the Express API, and can serve the bundled React app. | `Dockerfile` and the Render web service. |
+| Vercel | Builds `frontend/` as a Vite project and forwards `/api/*` requests to Render. | `frontend/vercel.json` |
 
-### Tables
-- **users** - User accounts
-- **products** - Product catalog
-- **carts** - Shopping carts
-- **cart_items** - Items in carts
-- **orders** - Customer orders
-- **order_items** - Items in orders
-- **contacts** - Contact form submissions
-- **reviews** - Product reviews
+The Vercel proxy keeps browser API calls same-origin, so the public frontend does not contain a backend token or require a public API environment variable. The Render API requires `NODE_ENV=production` and a generated `JWT_SECRET`; configure SMTP values only if transactional email support is enabled.
 
-## 🚀 Deployment Options
+> The initial Render service is on the free plan. It may take time to wake after inactivity and does not provide persistent disk storage, so it is appropriate for this demonstration release rather than durable production order data.
 
-### Heroku
+## Repository and release workflow
+
+Use conventional, focused commits. Before creating a release, run the validation commands above, update this README when a public workflow changes, then create a semantic tag:
+
 ```bash
-heroku create your-app-name
-git push heroku main
+git tag -a v0.2.0 -m "Farm-Technology storefront modernization"
+git push origin v0.2.0
 ```
 
-### Vercel (Frontend) + Render (Backend)
-- Deploy `frontend/` folder to Vercel
-- Deploy `backend/` folder to Render
-- Configure CORS & environment variables
+## Roadmap
 
-### AWS
-- Frontend: S3 + CloudFront
-- Backend: EC2 or ECS
-- Database: RDS or DynamoDB
+The most valuable next improvements are checkout and order creation, persistent managed storage, inventory administration, real product media, and a dedicated account/order-history experience.
 
-### DigitalOcean
-- Deploy as Docker container
-- Use App Platform for easy deployment
+## License
 
-## 📈 Performance
-
-- SQLite database with indexes
-- Production build optimization
-- Caching headers configured
-- Rate limiting to prevent abuse
-- Efficient API queries
-
-## 🐛 Troubleshooting
-
-### Port Already in Use
-```bash
-# Find process
-lsof -i :3000  (Mac/Linux)
-netstat -ano | findstr :3000  (Windows)
-
-# Kill process
-kill -9 <PID>
-```
-
-### Database Lock
-```bash
-# Remove database and reinit
-rm backend/farming_tech.db
-cd backend && node scripts/init-db.js && node scripts/seed-db.js
-```
-
-### Token Expired
-- Clear localStorage: `localStorage.clear()`
-- Login again
-
-## 📝 Development
-
-### Adding a New Product
-```bash
-curl -X POST http://localhost:3000/api/admin/products \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "New Product",
-    "category": "seeds",
-    "price": 299,
-    "description": "Product description",
-    "stock": 50
-  }'
-```
-
-### Creating an Order
-1. User registers/logs in
-2. Browse products
-3. Add to cart
-4. Checkout with shipping address
-5. Order created with "pending" status
-6. Admin processes & ships
-
-## 🤝 Contributing
-
-1. Fork repository
-2. Create feature branch
-3. Make changes
-4. Submit pull request
-
-## 📄 License
-
-MIT License - see LICENSE file
-
-## 🆘 Support
-
-- GitHub Issues: Report bugs
-- Email: support@farmingtechshop.com
-- Documentation: See PRODUCTION_GUIDE.md
-
----
-
-**Built with ❤️ for farmers worldwide. 🌾**
-
+This project is available under the [MIT License](LICENSE).

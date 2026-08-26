@@ -12,3 +12,8 @@
 - [x] Establish a cohesive responsive Farm-Technology design system with clearer hierarchy, agricultural visual identity, accessible focus states, and consistent component styling.
 - [x] Rebuild the landing, catalog, cart, and contact experience around the updated system without losing existing product, auth, and cart flows.
 - [x] Validate the modernized interface at desktop and mobile sizes, then document the resulting architecture and UX improvements.
+- [ ] Audit the existing Vercel and Render deployment configuration, environment requirements, and repository release readiness.
+- [ ] Rewrite the repository README with setup, architecture, environment, validation, and deployment guidance for the current storefront.
+- [ ] Update GitHub repository description, homepage website URL, and relevant discovery topics without exposing credentials.
+- [ ] Create and push a semantic release tag for the verified architecture and UI modernization.
+- [ ] Complete the verified production deployment handoff or deployment action through the supported hosting integration.
