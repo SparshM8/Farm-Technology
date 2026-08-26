@@ -51,3 +51,11 @@ The mobile landing experience was rendered at a 390 × 844 viewport. The compact
 ## Next architectural milestones
 
 Checkout, order creation, account order history, product media management, and inventory administration remain separate future features. They should extend the `api` domain object and introduce focused hooks or contexts rather than placing new network calls directly in page components.
+
+## Production topology
+
+The current release uses a Git-connected Vercel Vite project at `https://farm-technology.vercel.app` and a Render Docker web service at `https://farm-technology-api-sparsh.onrender.com`. `frontend/vercel.json` forwards browser requests under `/api/*` to Render, so the React client keeps same-origin API paths while the API and UI deploy independently from the same `main` branch.
+
+On August 26, 2026, the production Vercel alias returned the storefront HTML with HTTP 200. The proxied `/api/health` endpoint returned a production `OK` response and `/api/products` returned the six seeded catalog items. The initial Render instance uses a free, non-persistent runtime; its SQLite store is therefore suitable for the demonstration release, not durable customer orders.
+
+The live browser review also confirmed the published responsive field-store hero, navigation controls, catalog CTA, six-item catalog, filter interface, account trigger, and empty-cart trigger render at the public Vercel URL.
