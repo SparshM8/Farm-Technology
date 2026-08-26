@@ -34,38 +34,32 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-// Get single product with reviews
-router.get('/:id', async (req, res, next) => {
+// Get all categories before the dynamic product route so "categories" is not treated as a product id.
+router.get('/categories/all', async (req, res, next) => {
   try {
     const db = await getDatabase();
     const dbAsync = promisifyDb(db);
-
-    const product = await dbAsync.get('SELECT * FROM products WHERE id = ?', [req.params.id]);
-    if (!product) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
-
-    const reviews = await dbAsync.all(
-      'SELECT r.id, r.rating, r.title, r.comment, r.created_at, u.name FROM reviews r JOIN users u ON r.user_id = u.id WHERE r.product_id = ? ORDER BY r.created_at DESC',
-      [req.params.id]
-    );
-
-    res.json({ ...product, reviews });
+    const categories = await dbAsync.all('SELECT DISTINCT category FROM products ORDER BY category');
+    res.json(categories.map(c => c.category));
   } catch (error) {
     next(error);
   }
 });
 
-// Get all categories
-router.get('/categories/all', async (req, res, next) => {
+// Get single product with reviews
+router.get('/:id', async (req, res, next) => {
   try {
     const db = await getDatabase();
     const dbAsync = promisifyDb(db);
-
-    const categories = await dbAsync.all(
-      'SELECT DISTINCT category FROM products ORDER BY category'
+    const product = await dbAsync.get('SELECT * FROM products WHERE id = ?', [req.params.id]);
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    const reviews = await dbAsync.all(
+      'SELECT r.id, r.rating, r.title, r.comment, r.created_at, u.name FROM reviews r JOIN users u ON r.user_id = u.id WHERE r.product_id = ? ORDER BY r.created_at DESC',
+      [req.params.id]
     );
-    res.json(categories.map(c => c.category));
+    res.json({ ...product, reviews });
   } catch (error) {
     next(error);
   }

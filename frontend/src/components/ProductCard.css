@@ -107,6 +107,8 @@
   background-color: var(--secondary-color);
 }
 
+.add-to-cart-btn:disabled { cursor:not-allowed; opacity:.68; }
+
 @media (max-width: 768px) {
   .product-card {
     margin: 0;

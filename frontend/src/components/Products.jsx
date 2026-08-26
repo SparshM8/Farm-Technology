@@ -1,44 +1,6 @@
 import ProductCard from './ProductCard';
 import './Products.css';
 
-export default function Products({ products, categories, selectedCategory, onCategoryChange, loading }) {
-  return (
-    <section id="products" className="products-section">
-      <div className="container">
-        <h2>Our Products</h2>
-        
-        <div className="category-filters">
-          <button
-            className={`filter-btn ${selectedCategory === 'all' ? 'active' : ''}`}
-            onClick={() => onCategoryChange('all')}
-          >
-            All Products
-          </button>
-          {categories.map((category) => (
-            <button
-              key={category}
-              className={`filter-btn ${selectedCategory === category ? 'active' : ''}`}
-              onClick={() => onCategoryChange(category)}
-            >
-              {category.charAt(0).toUpperCase() + category.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        {loading ? (
-          <div className="loading">Loading products...</div>
-        ) : (
-          <div className="products-grid">
-            {products.length > 0 ? (
-              products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))
-            ) : (
-              <p className="no-products">No products found in this category.</p>
-            )}
-          </div>
-        )}
-      </div>
-    </section>
-  );
+export default function Products({ products, categories, selectedCategory, onCategoryChange, searchQuery, onSearchChange, loading, onAddToCart }) {
+  return <section id="products" className="products-section"><div className="container"><div className="products-heading"><div><p className="eyebrow">FIELD-READY SUPPLIES</p><h2>Grow with better tools.</h2></div><p>Practical agri-tech essentials curated for everyday decisions in the field.</p></div><div className="catalog-toolbar"><label className="catalog-search"><span className="sr-only">Search products</span><input value={searchQuery} onChange={(event) => onSearchChange(event.target.value)} placeholder="Search seeds, tools, fertilizers…" /></label><span>{products.length} {products.length === 1 ? 'product' : 'products'} showing</span></div><div className="category-filters"><button className={`filter-btn ${selectedCategory === 'all' ? 'active' : ''}`} onClick={() => onCategoryChange('all')}>All Products</button>{categories.map((category) => <button key={category} className={`filter-btn ${selectedCategory === category ? 'active' : ''}`} onClick={() => onCategoryChange(category)}>{category.charAt(0).toUpperCase() + category.slice(1)}</button>)}</div>{loading ? <div className="loading">Loading products…</div> : <div className="products-grid">{products.length > 0 ? products.map((product) => <ProductCard key={product.id} product={product} onAddToCart={onAddToCart} />) : <p className="no-products">No products match this field search. Try a different crop input or category.</p>}</div>}</div></section>;
 }
